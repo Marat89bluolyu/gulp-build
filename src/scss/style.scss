@@ -1,5 +1,2 @@
-$bg-color: blue;
-
-body {
-    background: $bg-color;
-}
+@import "svg_sprite";
+@import "base";

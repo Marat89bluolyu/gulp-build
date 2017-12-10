@@ -5,7 +5,61 @@ concat      = require('gulp-concat'), // Подключаем gulp-concat (дл�
 uglify      = require('gulp-uglifyjs'); // Подключаем gulp-uglifyjs (для сжатия JS),
 cssnano     = require('gulp-cssnano'), // Подключаем пакет для минификации CSS
 rename      = require('gulp-rename'), // Подключаем библиотеку для переименования файлов
-del         = require('del'); // Подключаем библиотеку для удаления файлов и папок
+del         = require('del'), // Подключаем библиотеку для удаления файлов и папок
+svgSprite = require('gulp-svg-sprites'),
+svgmin = require('gulp-svgmin'),
+cheerio = require('gulp-cheerio'),
+replace = require('gulp-replace');
+
+gulp.task('svgSpriteBuild', function () {
+	return gulp.src('src/images/icons-svg/*.svg')
+		// minify svg
+		.pipe(svgmin({
+			js2svg: {
+				pretty: true
+			}
+		}))
+		// remove all fill and style declarations in out shapes
+		.pipe(cheerio({
+			run: function ($) {
+				$('[fill]').removeAttr('fill');
+				$('[style]').removeAttr('style');
+			},
+			parserOptions: { xmlMode: true }
+		}))
+		// cheerio plugin create unnecessary string '>', so replace it.
+		.pipe(replace('&gt;', '>'))
+		// build svg sprite
+		.pipe(svgSprite({
+				mode: "symbols",
+				preview: false,
+				selector: "icon-%f",
+				svg: {
+					symbols: 'symbol_sprite.html'
+				}
+			}
+		))
+		.pipe(gulp.dest('src/images'));
+});
+
+gulp.task('svgSpriteSass', function () {
+	return gulp.src('src/images/icons-svg/*.svg')
+		.pipe(svgSprite({
+				preview: false,
+				selector: "icon-%f",
+				svg: {
+					sprite: 'svg_sprite.html'
+				},
+				cssFile: 'scss/_svg_sprite.scss',
+				templates: {
+					css: require("fs").readFileSync('src/scss/_sprite-template.scss', "utf-8")
+				}
+			}
+		))
+		.pipe(gulp.dest('src/images/'));
+});
+
+gulp.task('svgSprite', ['svgSpriteBuild', 'svgSpriteSass']);
 
 // Compile sass into CSS & auto-inject into browsers
 gulp.task('sass', function() {
@@ -55,7 +109,7 @@ gulp.task('clean', function() {
     return del.sync('dist'); // Удаляем папку dist перед сборкой
 });
 
-gulp.task('build', ['clean', 'sass', 'scripts'], function() {
+gulp.task('build', ['clean', 'sass', 'svgSprite', 'scripts'], function() {
     
         var buildCss = gulp.src([ // Переносим CSS стили в продакшен
             'src/css/*.css',
@@ -67,8 +121,11 @@ gulp.task('build', ['clean', 'sass', 'scripts'], function() {
         .pipe(gulp.dest('dist/fonts'))
     
         var buildJs = gulp.src('src/js/**/*') // Переносим скрипты в продакшен
-        .pipe(gulp.dest('dist/js'))
-    
+		.pipe(gulp.dest('dist/js'))
+		
+        var buildImg = gulp.src('src/images/**/*') // Переносим скрипты в продакшен
+        .pipe(gulp.dest('dist/images'))
+        
         var buildHtml = gulp.src('src/*.html') // Переносим HTML в продакшен
         .pipe(gulp.dest('dist'));
     });
