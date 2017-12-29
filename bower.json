@@ -1,0 +1,23 @@
+{
+  "name": "gulper",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Marat <alembikovm@gmail.com>"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/Marat89bluolyu/gulp-build",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/libs",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "magnific-popup": "^1.1.0"
+  }
+}

@@ -99,7 +99,7 @@ gulp.task('serve', ['css-libs', 'scripts'], function() {
         server: "./src"  
     });
 
-    gulp.watch(['src/scss/bootstrap/scss/bootstrap.scss', 'src/scss/*.scss'], ['sass']);
+    gulp.watch(['src/scss/bootstrap/scss/bootstrap.scss', 'src/scss/*.scss', 'src/js/common.js'], ['sass','js']);
     gulp.watch("src/*.html").on('change', browserSync.reload);
 });
 
@@ -109,7 +109,7 @@ gulp.task('clean', function() {
     return del.sync('dist'); // Удаляем папку dist перед сборкой
 });
 
-gulp.task('build', ['clean', 'sass', 'svgSprite', 'scripts'], function() {
+gulp.task('build', ['clean', 'sass', 'svgSprite', 'scripts', 'js'], function() {
     
         var buildCss = gulp.src([ // Переносим CSS стили в продакшен
             'src/css/*.css',
